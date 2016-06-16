@@ -1,0 +1,5 @@
+name = "Taxonomy Bootstrap Accordion"
+description = "Creates a block that has a bootstrap accordion representation of all taxonomy items that are not open tags."
+core = 7.x
+package = Taxonomy
+dependencies[] = taxonomy

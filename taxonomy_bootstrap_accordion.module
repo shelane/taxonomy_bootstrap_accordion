@@ -1,0 +1,149 @@
+<?php
+
+define("TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES", "taxonomy_bootstrap_accordion_all_vocabs_vocabularies");
+
+function taxonomy_bootstrap_accordion_block_info() {
+  return array(
+    "all_vocabs"=>array(
+      "info"=>t("All Vocabularies Accordion"),
+      "cache"=>DRUPAL_CACHE_PER_PAGE,
+    ),
+  );
+}
+
+function taxonomy_bootstrap_accordion_block_view($delta) {
+  if ($delta == "all_vocabs") {
+    return taxonomy_bootstrap_accordion_all_vocabs_block();
+  }
+}
+
+function taxonomy_bootstrap_accordion_block_configure($delta) {
+  if ($delta == "all_vocabs") {
+    return taxonomy_bootstrap_accordion_all_vocabs_config();
+  }
+}
+
+/*
+  Expects the machine name of the vocabulary
+ */
+
+function taxonomy_bootstrap_accordion_group_for_vocab($vocabulary) {
+
+  $vocabs = taxonomy_vocabulary_get_names();
+  $vocab = $vocabs[$vocabulary];
+
+  $terms = new EntityFieldQuery();
+  $terms = $terms->entityCondition("entity_type", "taxonomy_term")
+    ->propertyCondition("vid", $vocab->vid)
+    ->execute();
+
+  $terms = $terms["taxonomy_term"];
+
+  $terms = taxonomy_term_load_multiple(array_keys($terms));
+  $term_links = array();
+
+  $current_path = current_path();
+  $open = '';
+  $active = '';
+  $expanded = 'false';
+  foreach ($terms as $tid=>$term) {
+    $apply_active = FALSE;
+    $path = taxonomy_term_uri($term);
+    if ($path["path"] == $current_path) {
+      $apply_active = TRUE;
+      $open = 'in';
+      $expanded = 'true';
+      $active = 'active-trail active';
+    }
+    $classes = $apply_active ? array($active) : array();
+    $class = implode(" ", $classes);
+    $term_links["term_$tid"] = array(
+      "#prefix"=>"<li class='$class'>",
+      "#suffix"=>"</li>",
+      "#children"=>l($term->name, $path["path"]),
+    );
+  }
+
+  $group = array(
+    "#prefix"=>"<div class='panel panel-default'>",
+    "#suffix"=>"</div>",
+    "heading"=>array(
+      "#prefix"=>"<div class='panel-heading $active' role='tab'>",
+      "#suffix"=>"</div>",
+      "#markup"=>t("<a role='button' data-parent='#all_vocabs' data-toggle='collapse' class='$active accordion-toggle' aria-expanded='$expanded' href='@url'>@name</a>", array("@name"=>$vocab->name, "@url"=>"#collapse_$vocabulary")),
+    ),
+    "body"=>array(
+      "#prefix"=>"<div class='panel-collapse collapse $open' id='collapse_" . $vocabulary . "'><ul class='menu nav'>",
+      "#suffix"=>"</ul></div>",
+      "links"=>$term_links,
+    ),
+  );
+  return $group;
+}
+
+function taxonomy_bootstrap_accordion_all_vocabs_config() {
+  $vocabs = taxonomy_get_vocabularies();
+
+  $weighted = array();
+
+  foreach ($vocabs as $machine=>$vocab) {
+    //Place them in an array, in case of a weight collision
+    $weighted[$vocab->weight][] = $vocab->vid;
+  }
+
+  ksort($weighted, SORT_NUMERIC);
+
+  //Flatten the weighted arrays
+  $flattened = array();
+  foreach ($weighted as $weight=>$items) {
+    foreach ($items as $vid) {
+      $flattened[] = $vid;
+    }
+  }
+
+  $weighted = $flattened;
+
+  $options = array();
+
+  foreach ($weighted as $vid) {
+    $options[$vocabs[$vid]->machine_name] = t($vocabs[$vid]->name);
+  }
+
+  return array(
+    TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES =>array(
+      "#type"=>"checkboxes",
+      "#default_value"=>variable_get(TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES, array_keys($options)),
+      "#options"=>$options,
+      "#title"=>t("Vocabularies to Include"),
+    ),
+  );
+}
+
+function taxonomy_bootstrap_accordion_block_save($delta = '', $edit = array()) {
+  if ($delta == "all_vocabs") {
+    variable_set(TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES, $edit[TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES]);
+  }
+}
+
+function taxonomy_bootstrap_accordion_all_vocabs_block() {
+  $vocabs = variable_get(TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES, array());
+  if ($vocabs) {
+    $groups = array();
+    foreach ($vocabs as $vid=>$value) {
+      if ($value) {
+        $groups["vocab_$vid"] = taxonomy_bootstrap_accordion_group_for_vocab($vid);
+      }
+    }
+  } else {
+    $groups = array();
+  }
+  $page = array(
+    "#prefix"=>"<div id='all_vocabs' class='block-menu-block panel-group'>",
+    "groups"=> $groups,
+    "#suffix"=>"</div>",
+  );
+  return array(
+    "subject"=>NULL,
+    "content"=>drupal_render($page),
+  );
+}
