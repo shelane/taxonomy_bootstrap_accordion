@@ -4,9 +4,9 @@ define("TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES", "taxonomy_bootstrap_accordio
 
 function taxonomy_bootstrap_accordion_block_info() {
   return array(
-    "all_vocabs"=>array(
-      "info"=>t("All Vocabularies Accordion"),
-      "cache"=>DRUPAL_CACHE_PER_PAGE,
+    "all_vocabs" => array(
+      "info" => t("All Vocabularies Accordion"),
+      "cache" => DRUPAL_CACHE_PER_PAGE,
     ),
   );
 }
@@ -23,7 +23,7 @@ function taxonomy_bootstrap_accordion_block_configure($delta) {
   }
 }
 
-/*
+/**
   Expects the machine name of the vocabulary
  */
 
@@ -46,7 +46,7 @@ function taxonomy_bootstrap_accordion_group_for_vocab($vocabulary) {
   $open = '';
   $active = '';
   $expanded = 'false';
-  foreach ($terms as $tid=>$term) {
+  foreach ($terms as $tid => $term) {
     $apply_active = FALSE;
     $path = taxonomy_term_uri($term);
     if ($path["path"] == $current_path) {
@@ -58,24 +58,24 @@ function taxonomy_bootstrap_accordion_group_for_vocab($vocabulary) {
     $classes = $apply_active ? array($active) : array();
     $class = implode(" ", $classes);
     $term_links["term_$tid"] = array(
-      "#prefix"=>"<li class='$class'>",
-      "#suffix"=>"</li>",
-      "#children"=>l($term->name, $path["path"]),
+      "#prefix" => "<li class='$class'>",
+      "#suffix" => "</li>",
+      "#children" => l($term->name, $path["path"]),
     );
   }
 
   $group = array(
-    "#prefix"=>"<div class='panel panel-default'>",
-    "#suffix"=>"</div>",
-    "heading"=>array(
-      "#prefix"=>"<div class='panel-heading $active' role='tab'>",
-      "#suffix"=>"</div>",
-      "#markup"=>t("<a role='button' data-parent='#all_vocabs' data-toggle='collapse' class='$active accordion-toggle' aria-expanded='$expanded' href='@url'>@name</a>", array("@name"=>$vocab->name, "@url"=>"#collapse_$vocabulary")),
+    "#prefix" => "<div class='panel panel-default'>",
+    "#suffix" => "</div>",
+    "heading" => array(
+      "#prefix" => "<div class='panel-heading $active' role='tab'>",
+      "#suffix" => "</div>",
+      "#markup" => t("<a role='button' data-parent='#all_vocabs' data-toggle='collapse' class='$active accordion-toggle' aria-expanded='$expanded' href='@url'>@name</a>", array("@name" => $vocab->name, "@url" => "#collapse_$vocabulary")),
     ),
-    "body"=>array(
-      "#prefix"=>"<div class='panel-collapse collapse $open' id='collapse_" . $vocabulary . "'><ul class='menu nav'>",
-      "#suffix"=>"</ul></div>",
-      "links"=>$term_links,
+    "body" => array(
+      "#prefix" => "<div class='panel-collapse collapse $open' id='collapse_" . $vocabulary . "'><ul class='menu nav'>",
+      "#suffix" => "</ul></div>",
+      "links" => $term_links,
     ),
   );
   return $group;
@@ -86,7 +86,7 @@ function taxonomy_bootstrap_accordion_all_vocabs_config() {
 
   $weighted = array();
 
-  foreach ($vocabs as $machine=>$vocab) {
+  foreach ($vocabs as $machine => $vocab) {
     //Place them in an array, in case of a weight collision
     $weighted[$vocab->weight][] = $vocab->vid;
   }
@@ -95,7 +95,7 @@ function taxonomy_bootstrap_accordion_all_vocabs_config() {
 
   //Flatten the weighted arrays
   $flattened = array();
-  foreach ($weighted as $weight=>$items) {
+  foreach ($weighted as $weight => $items) {
     foreach ($items as $vid) {
       $flattened[] = $vid;
     }
@@ -110,11 +110,11 @@ function taxonomy_bootstrap_accordion_all_vocabs_config() {
   }
 
   return array(
-    TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES =>array(
-      "#type"=>"checkboxes",
-      "#default_value"=>variable_get(TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES, array_keys($options)),
-      "#options"=>$options,
-      "#title"=>t("Vocabularies to Include"),
+    TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES => array(
+      "#type" => "checkboxes",
+      "#default_value" => variable_get(TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES, array_keys($options)),
+      "#options" => $options,
+      "#title" => t("Vocabularies to Include"),
     ),
   );
 }
@@ -129,7 +129,7 @@ function taxonomy_bootstrap_accordion_all_vocabs_block() {
   $vocabs = variable_get(TAXONOMY_BOOTSTRAP_ACCORDION_VOCABULARIES, array());
   if ($vocabs) {
     $groups = array();
-    foreach ($vocabs as $vid=>$value) {
+    foreach ($vocabs as $vid => $value) {
       if ($value) {
         $groups["vocab_$vid"] = taxonomy_bootstrap_accordion_group_for_vocab($vid);
       }
@@ -138,12 +138,12 @@ function taxonomy_bootstrap_accordion_all_vocabs_block() {
     $groups = array();
   }
   $page = array(
-    "#prefix"=>"<div id='all_vocabs' class='block-menu-block panel-group'>",
-    "groups"=> $groups,
-    "#suffix"=>"</div>",
+    "#prefix" =>" <div id='all_vocabs' class='block-menu-block panel-group'>",
+    "groups" => $groups,
+    "#suffix" => "</div>",
   );
   return array(
-    "subject"=>NULL,
-    "content"=>drupal_render($page),
+    "subject" => NULL,
+    "content" => drupal_render($page),
   );
 }
