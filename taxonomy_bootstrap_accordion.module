@@ -24,9 +24,8 @@ function taxonomy_bootstrap_accordion_block_configure($delta) {
 }
 
 /**
-  Expects the machine name of the vocabulary
+ * Expects the machine name of the vocabulary.
  */
-
 function taxonomy_bootstrap_accordion_group_for_vocab($vocabulary) {
 
   $vocabs = taxonomy_vocabulary_get_names();
@@ -87,13 +86,13 @@ function taxonomy_bootstrap_accordion_all_vocabs_config() {
   $weighted = array();
 
   foreach ($vocabs as $machine => $vocab) {
-    //Place them in an array, in case of a weight collision
+    // Place them in an array, in case of a weight collision.
     $weighted[$vocab->weight][] = $vocab->vid;
   }
 
   ksort($weighted, SORT_NUMERIC);
 
-  //Flatten the weighted arrays
+  // Flatten the weighted arrays.
   $flattened = array();
   foreach ($weighted as $weight => $items) {
     foreach ($items as $vid) {
@@ -134,11 +133,12 @@ function taxonomy_bootstrap_accordion_all_vocabs_block() {
         $groups["vocab_$vid"] = taxonomy_bootstrap_accordion_group_for_vocab($vid);
       }
     }
-  } else {
+  }
+  else {
     $groups = array();
   }
   $page = array(
-    "#prefix" =>" <div id='all_vocabs' class='block-menu-block panel-group'>",
+    "#prefix" => " <div id='all_vocabs' class='block-menu-block panel-group'>",
     "groups" => $groups,
     "#suffix" => "</div>",
   );
