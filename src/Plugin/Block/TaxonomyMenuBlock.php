@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @Block(
  *  id = "taxonomy_menu_block",
- *  admin_label = @Translation("All Vocabularies Accordion"),
+ *  admin_label = @Translation("Taxonomy Bootstrap Accordion"),
  *  category = @Translation("Menus")
  * )
  */
