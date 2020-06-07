@@ -87,7 +87,7 @@ class TaxonomyMenuBlock extends BlockBase {
     $term_links = [];
 
     $current_path = \Drupal::service('path.current')->getPath();
-    $alias_path = \Drupal::service('path.alias_manager')->getAliasByPath($current_path);
+    $alias_path = \Drupal::service('path_alias.manager')->getAliasByPath($current_path);
     $open = '';
     $active = '';
     $expanded = 'false';
